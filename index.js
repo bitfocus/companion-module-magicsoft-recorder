@@ -9,6 +9,7 @@ function instance(system, id, config) {
 	instance_skel.apply(this, arguments);
 
 	self.actions(); // export actions
+	self.init_presets();
 
 	return self;
 }
@@ -19,12 +20,15 @@ instance.prototype.updateConfig = function(config) {
 	self.config = config;
 
 	self.actions();
+	self.init_presets();
+
 }
 
 instance.prototype.init = function() {
 	var self = this;
 
 	self.status(self.STATE_OK);
+	self.init_presets();
 
 	debug = self.debug;
 	log = self.log;
@@ -87,6 +91,146 @@ instance.prototype.CHOICES_PRESET = [
 	{ id: '3', label: 'Preset 4' },
 ];
 
+instance.prototype.CHOICES_REC_TIME = [
+	{ id: '1', label: '1 Sec' },
+	{ id: '5', label: '5 Sec' },
+	{ id: '10', label: '10 Sec' },
+	{ id: '15', label: '15 Sec' },
+	{ id: '30', label: '30 Sec' },
+];
+
+instance.prototype.init_presets = function () {
+	var self = this;
+	var presets = [];
+	var pstSize = '14';
+
+	for (var input in self.CHOICES_CHANNELS) {
+
+		presets.push({
+			category: 'Recording Start',
+			label: 'Rec Start ' + self.CHOICES_CHANNELS[input].label,
+			bank: {
+				style: 'text',
+				text: 'Rec Start ' + self.CHOICES_CHANNELS[input].label,
+				size: pstSize,
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0)
+			},
+			actions: [{	
+				action: 'rec_start', 
+				options: {
+					ch: self.CHOICES_CHANNELS[input].id,
+					recname: self.CHOICES_CHANNELS[input].label
+				}
+			}]
+		});
+
+		presets.push({
+			category: 'Recording Stop',
+			label: 'Rec Stop ' + self.CHOICES_CHANNELS[input].label,
+			bank: {
+				style: 'text',
+				text: 'Rec Stop ' + self.CHOICES_CHANNELS[input].label,
+				size: pstSize,
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0)
+			},
+			actions: [{	
+				action: 'rec_stop', 
+				options: {
+					ch: self.CHOICES_CHANNELS[input].id,
+				}
+			}]
+		});
+
+		presets.push({
+			category: 'Recording Split',
+			label: 'Rec Split ' + self.CHOICES_CHANNELS[input].label,
+			bank: {
+				style: 'text',
+				text: 'Rec Split ' + self.CHOICES_CHANNELS[input].label,
+				size: pstSize,
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0)
+			},
+			actions: [{	
+				action: 'rec_split', 
+				options: {
+					ch: self.CHOICES_CHANNELS[input].id,
+				}
+			}]
+		});
+
+		presets.push({
+			category: 'Recording Mark',
+			label: 'Rec Mark ' + self.CHOICES_CHANNELS[input].label,
+			bank: {
+				style: 'text',
+				text: 'Rec Mark ' + self.CHOICES_CHANNELS[input].label,
+				size: pstSize,
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0)
+			},
+			actions: [{	
+				action: 'rec_mark', 
+				options: {
+					ch: self.CHOICES_CHANNELS[input].id,
+				}
+			}]
+		});
+
+	}
+
+	for (var input1 in self.CHOICES_CHANNELS) {
+		for (var input2 in self.CHOICES_VIDEO_MODE) {
+			presets.push({
+				category: 'Recording Preset',
+				label: 'Preset ' + self.CHOICES_CHANNELS[input1].label + ' ' + self.CHOICES_VIDEO_MODE[input2].label,
+				bank: {
+					style: 'text',
+					text: self.CHOICES_CHANNELS[input1].label + ' ' + self.CHOICES_VIDEO_MODE[input2].label,
+					size: pstSize,
+					color: '16777215',
+					bgcolor: self.rgb(0,0,0)
+				},
+				actions: [{	
+					action: 'rec_preset', 
+					options: {
+						ch: self.CHOICES_CHANNELS[input1].id,
+						encoder: '0',
+						video_mode: self.CHOICES_VIDEO_MODE[input2].label,
+						preset: '0',
+					}
+				}]
+			});
+		}
+	}
+
+	for (var input1 in self.CHOICES_CHANNELS) {
+		for (var input2 in self.CHOICES_REC_TIME) {
+			presets.push({
+				category: 'Recording Time Add',
+				label: 'Rec ' + self.CHOICES_CHANNELS[input1].label + ' Add ' + self.CHOICES_REC_TIME[input2].label,
+				bank: {
+					style: 'text',
+					text: 'Rec ' + self.CHOICES_CHANNELS[input1].label + ' Add ' + self.CHOICES_REC_TIME[input2].label,
+					size: pstSize,
+					color: '16777215',
+					bgcolor: self.rgb(0,0,0)
+				},
+				actions: [{	
+					action: 'rec_time', 
+					options: {
+						ch: self.CHOICES_CHANNELS[input1].id,
+						time: self.CHOICES_REC_TIME[input2].id,
+					}
+				}]
+			});
+		}
+	}
+
+	self.setPresetDefinitions(presets);
+}
 
 instance.prototype.actions = function(system) {
 	var self = this;

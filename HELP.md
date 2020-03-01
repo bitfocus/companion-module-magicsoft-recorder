@@ -13,9 +13,8 @@ This module will connect to MagicSoft Recorder.
 * **Recording Time** - Add time to the recording on X channel
 
 **Presets Included:**
-* None yet, comes when confirmed working
+* Presets for all current commands
 
 **Missing parts:**
-* Presets for all commands
 * Feedback for all commands
 * Feedback to get info on things like presets
