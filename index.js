@@ -43,7 +43,7 @@ instance.prototype.config_fields = function () {
 			id: 'host',
 			label: 'Target IP/Host',
 			width: 6,
-//			regex: self.REGEX_IP
+			regex: self.REGEX_IP
 		},
 		{
 			type: 'textinput',
@@ -67,6 +67,10 @@ instance.prototype.CHOICES_CHANNELS = [
 	{ id: '1', label: 'CH 2' },
 	{ id: '2', label: 'CH 3' },
 	{ id: '3', label: 'CH 4' },
+	{ id: '4', label: 'CH 5' },
+	{ id: '5', label: 'CH 6' },
+	{ id: '6', label: 'CH 7' },
+	{ id: '7', label: 'CH 8' },
 ];
 
 instance.prototype.CHOICES_ENCODER = [
@@ -382,44 +386,37 @@ instance.prototype.action = function(action) {
 	
 		case 'rec_status':
 			pack_type = 'get';
-			pack_cmd = '/recording/status';
-			pack_body = '{"channel": ' + o.ch + '}';
+			pack_cmd = '/recording/status?channel=' + o.ch;
 			break;
 	
 		case 'rec_start':
 			pack_type = 'post';
-			pack_cmd = '/recording/rec';
-			pack_body = '{"channel": ' + o.ch + ', "recname": "' + o.recname + '"}';
+			pack_cmd = '/recording/rec?channel=' + o.ch + '&recname=' + o.recname;
 			break;
 
 		case 'rec_stop':
 			pack_type = 'post';
-			pack_cmd = '/recording/stop';
-			pack_body = '{"channel": ' + o.ch + '}';
+			pack_cmd = '/recording/stop?channel=' + o.ch;
 			break;
 
 		case 'rec_split':
 			pack_type = 'post';
-			pack_cmd = '/recording/split';
-			pack_body = '{"channel": ' + o.ch + '}';
+			pack_cmd = '/recording/split?channel=' + o.ch;
 			break;
 
 		case 'rec_mark':
 			pack_type = 'post';
-			pack_cmd = '/recording/mark';
-			pack_body = '{"channel": ' + o.ch + '}';
+			pack_cmd = '/recording/mark?channel=' + o.ch;
 			break;
 			
 		case 'rec_preset':
 			pack_type = 'post';
-			pack_cmd = '/recording/preset';
-			pack_body = '{"channel": ' + o.ch + ', "encoder": ' + o.encoder + ', "videomode": ' + o.video_mode + ', "preset": ' + o.preset + '}';
+			pack_cmd = '/recording/preset?channel=' + o.ch + '&encoder=' + o.encoder + '&videomode=' + o.video_mode + '&preset=' + o.preset;
 			break;
 
 		case 'rec_time':
 			pack_type = 'post';
-			pack_cmd = '/recording/time/add';
-			pack_body = '{"channel": ' + o.ch + ', "time": ' + o.time + '}';
+			pack_cmd = '/recording/time/add?channel=' + o.ch + '&time=' + o.time;
 			break;
 	
 	}
@@ -427,15 +424,8 @@ instance.prototype.action = function(action) {
 	pack_url = 'http://' + c.host +  ':' + c.port + pack_cmd;
 
 	if (pack_type == 'post') {
-		var json_body;
-		try {
-			json_body = JSON.parse(pack_body);
-		} catch(e){
-			console.log('error', 'HTTP POST Request aborted: Malformed JSON Body (' + e.message+ ')');
-			self.status(self.STATUS_ERROR, e.message);
-			return
-		}
-		self.system.emit('rest', pack_url, json_body, function (err, result) {
+		console.log('Send: %o', pack_url);
+		self.system.emit('rest', pack_url, '',function (err, result) {
 			if (err !== null) {
 				console.log('error', 'HTTP POST Request failed (' + result.error.code + ')');
 				self.status(self.STATUS_ERROR, result.error.code);
