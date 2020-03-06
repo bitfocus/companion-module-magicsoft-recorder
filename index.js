@@ -82,17 +82,26 @@ instance.prototype.CHOICES_VIDEO_MODE = [
 	{ id: '-1', label: 'Unknown' },
 	{ id: '0', 	label: 'PAL' },
 	{ id: '1', 	label: 'NTSC' },
-	{ id: '2', 	label: 'HD 720p50' },
-	{ id: '3', 	label: 'HD 720p59.94' },
-	{ id: '4', 	label: 'HD 1080i50' },
-	{ id: '5', 	label: 'HD 1080i59.94' },
-];
-
-instance.prototype.CHOICES_PRESET = [
-	{ id: '0', label: 'Preset 1' },
-	{ id: '1', label: 'Preset 2' },
-	{ id: '2', label: 'Preset 3' },
-	{ id: '3', label: 'Preset 4' },
+	{ id: '2', 	label: 'HD 720p 50' },
+	{ id: '3', 	label: 'HD 720p 59.94' },
+	{ id: '4', 	label: 'HD 1080i 50' },
+	{ id: '5', 	label: 'HD 1080i 59.94' },
+	{ id: '6', 	label: 'HD 1080p 23.98' },
+	{ id: '7', 	label: 'HD 1080p 24' },
+	{ id: '8', 	label: 'HD 1080p 25' },
+	{ id: '9', 	label: 'HD 1080p 50' },
+	{ id: '10', label: 'HD 1080p 29.97' },
+	{ id: '11', label: 'HD 1080p 59.94' },
+	{ id: '12', label: 'HD 1080p 30' },
+	{ id: '13', label: 'HD 1080p 60' },
+	{ id: '14', label: 'UHD 4K 2160p 23.98' },
+	{ id: '15', label: 'UHD 4K 2160p 24' },
+	{ id: '16', label: 'UHD 4K 2160p 25' },
+	{ id: '17', label: 'UHD 4K 2160p 50' },
+	{ id: '18', label: 'UHD 4K 2160p 29.97' },
+	{ id: '19', label: 'UHD 4K 2160p 59.94' },
+	{ id: '20', label: 'UHD 4K 2160p 30' },
+	{ id: '21', label: 'UHD 4K 2160p 60' },
 ];
 
 instance.prototype.CHOICES_REC_TIME = [
@@ -240,21 +249,7 @@ instance.prototype.actions = function(system) {
 	var self = this;
 
 	self.setActions({
-		'pgm_status': {
-			label: 'PGM Status',
-		},
-		'rec_status': {
-			label: 'Record Status',
-			options: [
-				{
-					type: 'dropdown',
-					id: 'ch',
-					label: 'Channel:',
-					default: '0',
-					choices: self.CHOICES_CHANNELS
-				}
-			]
-		},
+
 		'rec_start': {
 			label: 'Recording Start',
 			options: [
@@ -334,12 +329,16 @@ instance.prototype.actions = function(system) {
 					choices: self.CHOICES_VIDEO_MODE
 				},
 				{
-					type: 'dropdown',
+					type: 'number',
 					id: 'preset',
 					label: 'Preset ID:',
-					default: '0',
-					choices: self.CHOICES_PRESET
-				}
+					min: 0,
+					max: 100,
+					default: 0,
+					required: true,
+					range: false,
+					regex: self.REGEX_NUMBER
+				},
 			]
 		},
 		'rec_time': {
@@ -379,16 +378,6 @@ instance.prototype.action = function(action) {
 
 	switch(action.action) {
 
-		case 'pgm_status':
-			pack_type = 'get';
-			pack_cmd = '/program/status';
-			break;
-	
-		case 'rec_status':
-			pack_type = 'get';
-			pack_cmd = '/recording/status?channel=' + o.ch;
-			break;
-	
 		case 'rec_start':
 			pack_type = 'post';
 			pack_cmd = '/recording/rec?channel=' + o.ch + '&recname=' + o.recname;
@@ -424,15 +413,12 @@ instance.prototype.action = function(action) {
 	pack_url = 'http://' + c.host +  ':' + c.port + pack_cmd;
 
 	if (pack_type == 'post') {
-		console.log('Send: %o', pack_url);
 		self.system.emit('rest', pack_url, '',function (err, result) {
 			if (err !== null) {
-				console.log('error', 'HTTP POST Request failed (' + result.error.code + ')');
+				self.log('error', 'HTTP POST Request failed (' + result.error.code + ')');
 				self.status(self.STATUS_ERROR, result.error.code);
 			}
 			else {
-				console.log('OK', 'HTTP Response: ');
-				console.log("%j", result.data.toString('utf8')); // Show Rough recived data in console
 				self.status(self.STATUS_OK);
 			}
 		});
@@ -441,12 +427,10 @@ instance.prototype.action = function(action) {
 
 		self.system.emit('rest_get', pack_url, function (err, result) {
 			if (err !== null) {
-				console.log('error', 'HTTP GET Request failed (' + result.error.code + ')');
+				self.log('error', 'HTTP GET Request failed (' + result.error.code + ')');
 				self.status(self.STATUS_ERROR, result.error.code);
 			}
 			else {
-				console.log('OK', 'HTTP Response: ');
-				console.log("%j", result.data.toString('utf8')); // Show Rough recived data in console
 				self.status(self.STATUS_OK);
 			}
 		});
@@ -456,3 +440,5 @@ instance.prototype.action = function(action) {
 
 instance_skel.extendedBy(instance);
 exports = module.exports = instance;
+
+
