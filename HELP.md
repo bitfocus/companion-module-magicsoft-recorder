@@ -7,8 +7,6 @@ This module will connect to MagicSoft Recorder.
 * Type in the port of the device.
 
 **Available commands for MagicSoft Recorder**
-* **PGM Status** - No function, only gets the status page atm. not fully implemented
-* **Recording Status** - No function, only gets the status of recording atm. not fully implemented
 * **Recording Start** - Starts a recording on X channel with X name
 * **Recording Stop** - Stops the recording on X channel
 * **Recording Split** - Splits the recording on X channel
